@@ -1,0 +1,99 @@
+/* LANHS Dashboard – Custom Color & UI Overrides */
+
+/* 1. SIDEBAR – Blue-gray gradient */
+.md\:flex-shrink-0 .bg-gray-800 {
+    background: linear-gradient(180deg, #1e3a5f 0%, #1a2744 100%) !important;
+}
+.md\:flex-shrink-0 .bg-gray-900 {
+    background: #142338 !important;
+}
+.bg-gray-800[class*="flex-col"] {
+    background: linear-gradient(180deg, #1e3a5f 0%, #1a2744 100%) !important;
+}
+.router-link.router-link-active,
+.router-link.router-link-exact-active {
+    background-color: rgba(59, 130, 246, 0.25) !important;
+    border-left: 3px solid #60a5fa !important;
+    color: #ffffff !important;
+}
+.router-link:not(.router-link-active):hover {
+    background-color: rgba(255, 255, 255, 0.08) !important;
+}
+nav .text-gray-300.text-xs {
+    color: #93c5fd !important;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+}
+nav .text-gray-400 {
+    color: #7cb3e0 !important;
+}
+
+/* 2. TOP NAVBAR */
+.bg-white.shadow {
+    border-bottom: 2px solid #3b82f6 !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06) !important;
+}
+
+/* 3. STAT CARDS */
+.grid.gap-5 > .bg-white.shadow.rounded-lg {
+    border-radius: 0.75rem !important;
+    border-top: 4px solid #3b82f6 !important;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.grid.gap-5 > .bg-white.shadow.rounded-lg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1) !important;
+}
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(1) { border-top-color: #3b82f6 !important; }
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(2) { border-top-color: #f59e0b !important; }
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(3) { border-top-color: #10b981 !important; }
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(4) { border-top-color: #ef4444 !important; }
+.grid.gap-5 .text-gray-500.truncate {
+    font-weight: 600 !important;
+    text-transform: uppercase;
+    font-size: 0.7rem !important;
+    letter-spacing: 0.05em;
+}
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(1) .text-3xl { color: #2563eb !important; }
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(2) .text-3xl { color: #d97706 !important; }
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(3) .text-3xl { color: #059669 !important; }
+.grid.gap-5 > .bg-white.shadow.rounded-lg:nth-child(4) .text-3xl { color: #dc2626 !important; }
+
+/* 4. CHART CARD */
+.grid.gap-6 > .bg-white.rounded-lg.shadow {
+    border-radius: 0.75rem !important;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.06) !important;
+}
+.grid.gap-6 .font-semibold { color: #1e3a5f !important; font-size: 1.05rem; }
+
+/* 5. PAGE BACKGROUND */
+.bg-gray-100 { background-color: #f1f5f9 !important; }
+
+/* 6. DASHBOARD HEADING */
+main > div:first-child h1.text-2xl { color: #1e3a5f !important; font-weight: 700 !important; }
+
+/* 7. TABLE HEADERS */
+.table-primary th, thead.table-primary th {
+    background-color: #1e3a5f !important;
+    color: #ffffff !important;
+}
+.bg-white.shadow { border-radius: 0.5rem; }
+
+/* 8. BUTTONS */
+.btn-green { background-color: #2563eb !important; border-color: #2563eb !important; }
+.btn-green:hover { background-color: #1d4ed8 !important; }
+.btn-blue { background-color: #3b82f6 !important; }
+.btn-blue:hover { background-color: #2563eb !important; }
+
+/* 9. TABLE ROW HOVER */
+table tbody tr { transition: background-color 0.15s ease; }
+table tbody tr:hover { background-color: #eff6ff !important; }
+
+/* 10. LOGO TEXT */
+.text-gray-200 { color: #bfdbfe !important; }
+
+/* 11. SCROLLBAR */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f5f9; }
+::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
