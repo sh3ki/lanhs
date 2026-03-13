@@ -151,11 +151,7 @@
     <!-- Chart -->
     <div class="card mb-4">
         <div class="card-body" style="position:relative;">
-            <div id="chartPlaceholder" class="d-flex flex-column align-items-center justify-content-center text-muted" style="height:200px;">
-                <i class="bi bi-calendar-range" style="font-size:2.5rem;"></i>
-                <p class="mt-2 mb-0 fs-6">Select a date range to view the chart.</p>
-            </div>
-            <canvas id="ticketsChart" height="100" class="d-none"></canvas>
+            <canvas id="ticketsChart" height="100"></canvas>
         </div>
     </div>
 
@@ -272,19 +268,14 @@
             }
         });
 
-        // Rebuild chart by scanning ALL tbody rows directly (not via DataTable filter)
+        // Rebuild chart — no range = all rows; range = filtered rows
         function refreshChart() {
-            if (!minDate || !maxDate) {
-                $('#chartPlaceholder').removeClass('d-none');
-                $('#ticketsChart').addClass('d-none');
-                return;
-            }
             const counts = {};
             $('#ticketsTable tbody tr').each(function () {
                 const dateStr = $(this).find('td').eq(6).text().trim();
                 if (!dateStr || dateStr === 'N/A') return;
                 const d = parseLocalDate(dateStr);
-                if (d < minDate || d > maxDate) return;
+                if (minDate && maxDate && (d < minDate || d > maxDate)) return;
                 const [y, m] = dateStr.split('-').map(Number);
                 const key = `${y}-${String(m).padStart(2, '0')}`;
                 if (!counts[key]) counts[key] = { label: `${MONTH_NAMES[m - 1]} ${y}`, n: 0 };
@@ -293,13 +284,20 @@
             const sorted = Object.keys(counts).sort();
             ticketsChart.data.labels           = sorted.map(k => counts[k].label);
             ticketsChart.data.datasets[0].data = sorted.map(k => counts[k].n);
-            $('#chartPlaceholder').addClass('d-none');
-            $('#ticketsChart').removeClass('d-none');
             ticketsChart.resize();
             ticketsChart.update();
         }
 
-        // Initial state: show placeholder only
+        // ─── DataTable date-range filter ──────────────────────────────────────
+        $.fn.dataTable.ext.search.push(function (settings, data) {
+            if (!minDate || !maxDate) return true;
+            const dateStr = data[6];
+            if (!dateStr) return false;
+            const d = parseLocalDate(dateStr);
+            return d >= minDate && d <= maxDate;
+        });
+
+        // Initial state: show all
         refreshChart();
 
         // ─── Flatpickr date-range picker ──────────────────────────────────────
@@ -323,6 +321,7 @@
                     minDate = maxDate = null;
                     $('#clearDateBtn').prop('disabled', true);
                 }
+                table.draw();
                 refreshChart();
             }
         });
@@ -332,15 +331,12 @@
             picker.clear();
             minDate = maxDate = null;
             $(this).prop('disabled', true);
+            table.draw();
             refreshChart();
         });
 
         // ─── PDF Download ─────────────────────────────────────────────────────
         $('#downloadPdfBtn').on('click', function () {
-            if (!minDate || !maxDate) {
-                alert('Please select a date range first before downloading the PDF.');
-                return;
-            }
             const { jsPDF } = window.jspdf;
             const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
             const pageWidth  = doc.internal.pageSize.getWidth();   // 297
