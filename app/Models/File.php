@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
-use Storage;
-use Str;
+use Illuminate\Support\Str;
 
 /**
  * App\Models\File
@@ -53,17 +52,28 @@ class File extends Model
 {
     use Filterable, HasFactory;
 
+    private function downloadUrl(array $query = []): string
+    {
+        $url = route('files.download', $this->uuid);
+        if (count($query) === 0) {
+            return $url;
+        }
+
+        return $url.'?'.http_build_query($query);
+    }
+
     public function url(): ?string
     {
         if ($this->disk === 'public') {
-            return Storage::disk($this->disk)->url($this->path.'/'.$this->server_name);
+            // Use controller route instead of /storage symlink for shared-hosting compatibility.
+            return $this->downloadUrl(['inline' => 1]);
         }
         return null;
     }
 
     public function download(): string
     {
-        return route('files.download', $this->uuid);
+        return $this->downloadUrl();
     }
 
     public function preview(): ?string
@@ -72,7 +82,7 @@ class File extends Model
             if ($this->disk === 'public') {
                 return $this->url();
             }
-            return route('files.download', $this->uuid).'?inline=1';
+            return $this->downloadUrl(['inline' => 1]);
         }
         return null;
     }
