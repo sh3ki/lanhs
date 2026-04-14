@@ -46,6 +46,7 @@
                                                 id="department"
                                                 v-model="ticket.department_id"
                                                 :options="departmentList"
+                                                :placeholder="$t('Select department')"
                                                 option-label="name"
                                                 required
                                             />
