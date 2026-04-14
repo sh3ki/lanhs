@@ -9,8 +9,12 @@ const store = new Vuex.Store({
         permissions: {},
         settings: false,
         unreadTicketUuids: [],
+        dashboardNotificationCount: 0,
     },
     mutations: {
+        setDashboardNotificationCount(state, count) {
+            state.dashboardNotificationCount = Number(count) || 0;
+        },
         setUnreadTicketUuids(state, uuids) {
             state.unreadTicketUuids = uuids || [];
         },
@@ -27,6 +31,8 @@ const store = new Vuex.Store({
             axios.post('api/auth/logout').then(function () {
                 state.user = false;
             });
+            state.unreadTicketUuids = [];
+            state.dashboardNotificationCount = 0;
             delete window.axios.defaults.headers.common.Authorization;
             localStorage.removeItem('token');
         },
