@@ -100,6 +100,40 @@
         .table-responsive {
             overflow-x: auto;
         }
+
+        #ticketsTable_filter {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: nowrap;
+        }
+
+        #ticketsTable_filter label {
+            margin-bottom: 0;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        #priorityFilter {
+            width: 180px;
+            min-width: 180px;
+            display: inline-block;
+        }
+
+        .reports-priority-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+
+        @media (max-width: 768px) {
+            #ticketsTable_filter {
+                flex-wrap: wrap;
+            }
+        }
     </style>
 </head>
 <body class="light-mode">
@@ -237,6 +271,30 @@
             }
         });
 
+        function extractText(value) {
+            return $('<div>').html(value || '').text().trim();
+        }
+
+        let selectedPriority = '';
+
+        const uniquePriorities = [...new Set(
+            table.column(2).data().toArray().map(extractText).filter(Boolean)
+        )].sort((a, b) => a.localeCompare(b));
+
+        const $priorityFilter = $('<select id="priorityFilter" class="form-select form-select-sm"><option value="">All priorities</option></select>');
+        uniquePriorities.forEach((priority) => {
+            $priorityFilter.append(`<option value="${priority}">${priority}</option>`);
+        });
+
+        const $priorityFilterWrapper = $('<div class="reports-priority-filter"><label for="priorityFilter" class="mb-0">Priority:</label></div>');
+        $priorityFilterWrapper.append($priorityFilter);
+        $('#ticketsTable_filter').append($priorityFilterWrapper);
+
+        $priorityFilter.on('change', function () {
+            selectedPriority = this.value;
+            table.draw();
+        });
+
         // ─── Date helpers ─────────────────────────────────────────────────────
         function parseLocalDate(str) {
             const [y, m, d] = str.split('-').map(Number);
@@ -290,15 +348,29 @@
 
         // ─── DataTable date-range filter ──────────────────────────────────────
         $.fn.dataTable.ext.search.push(function (settings, data) {
-            if (!minDate || !maxDate) return true;
+            if (!settings.nTable || settings.nTable.id !== 'ticketsTable') {
+                return true;
+            }
+
             const dateStr = data[6];
-            if (!dateStr) return false;
-            const d = parseLocalDate(dateStr);
-            return d >= minDate && d <= maxDate;
+            if (minDate && maxDate) {
+                if (!dateStr) return false;
+                const d = parseLocalDate(dateStr);
+                const matchesDate = d >= minDate && d <= maxDate;
+                if (!matchesDate) return false;
+            }
+
+            if (!selectedPriority) return true;
+            const rowPriority = extractText(data[2]);
+            return rowPriority === selectedPriority;
         });
 
         // Initial state: show all
         refreshChart();
+
+        table.on('draw', function () {
+            refreshChart();
+        });
 
         // ─── Flatpickr date-range picker ──────────────────────────────────────
         const picker = flatpickr('#dateRange', {
@@ -322,7 +394,6 @@
                     $('#clearDateBtn').prop('disabled', true);
                 }
                 table.draw();
-                refreshChart();
             }
         });
 
@@ -332,7 +403,6 @@
             minDate = maxDate = null;
             $(this).prop('disabled', true);
             table.draw();
-            refreshChart();
         });
 
         // ─── PDF Download ─────────────────────────────────────────────────────
