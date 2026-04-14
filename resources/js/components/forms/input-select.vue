@@ -25,7 +25,7 @@
                         </template>
                         <div v-else class="flex items-center space-x-3 w-full pl-3 pr-10 py-2">
                             <template v-if="!anySelected">
-                                <span class="block truncate">{{ $t('Select an option') }}</span>
+                                <span class="block truncate">{{ placeholderText }}</span>
                             </template>
                             <template v-else-if="multiple">
                                 <span class="block truncate">{{ $t('Selected') }} {{ Object.keys(selected).length }} {{ $t('options') }}</span>
@@ -63,7 +63,7 @@
                     >
                         <div class="flex items-center space-x-3">
                             <div :class="!anySelected ? 'font-semibold' : 'font-normal'" class="font-normal block truncate">
-                                {{ $t('Select an option') }}
+                                {{ placeholderText }}
                             </div>
                         </div>
                     </li>
@@ -76,7 +76,7 @@
                     >
                         <slot :anySelected="anySelected" name="notFound">
                             <div class="flex items-center space-x-3">
-                                <div class="font-normal block truncate font-normal">
+                                <div class="font-normal block truncate">
                                     {{ $t('No results found') }}
                                 </div>
                             </div>
@@ -148,6 +148,10 @@ export default {
             type: Boolean,
             default: false
         },
+        placeholder: {
+            type: String,
+            default: null
+        },
     },
     computed: {
         selected: {
@@ -163,6 +167,9 @@ export default {
                 return Object.keys(this.selected).length !== 0;
             }
             return this.selected !== null;
+        },
+        placeholderText() {
+            return this.placeholder || this.$t('Select an option');
         },
         filteredOptions() {
             const self = this;
