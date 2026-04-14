@@ -65,10 +65,6 @@
                                         @click.native="onMyTicketsClick"
                                     >
                                         <span class="flex-1">{{ $t('My tickets') }}</span>
-                                        <span v-if="notificationCount > 0" class="flex h-2.5 w-2.5 ml-2">
-                                            <span class="animate-ping absolute inline-flex h-2.5 w-2.5 rounded-full bg-red-500 opacity-75"></span>
-                                            <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
-                                        </span>
                                     </router-link>
                                     <router-link
                                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition ease-in-out duration-150"
@@ -125,6 +121,7 @@ export default {
         fetchNotificationCount() {
             axios.get('api/dashboard/notifications/count').then((response) => {
                 this.notificationCount = response.data.count || 0;
+                this.$store.commit('setDashboardNotificationCount', this.notificationCount);
                 // Share unread ticket UUIDs via Vuex so list.vue can show per-ticket dots
                 this.$store.commit('setUnreadTicketUuids', response.data.ticket_uuids || []);
             }).catch(() => {
