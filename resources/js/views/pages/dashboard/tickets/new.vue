@@ -27,6 +27,7 @@
                                             id="customer"
                                             v-model="ticket.user_id"
                                             :options="userList"
+                                            :placeholder="$t('Select Customer')"
                                             option-label="name"
                                             required
                                             searchable
@@ -74,6 +75,7 @@
                                             id="department"
                                             v-model="ticket.department_id"
                                             :options="departmentList"
+                                            :placeholder="$t('Select department')"
                                             option-label="name"
                                             required
                                         />
