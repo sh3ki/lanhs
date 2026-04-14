@@ -16,6 +16,7 @@
             :mobile="mobile"
             icon="font-awesome.inbox-regular"
             to="/dashboard/tickets"
+            :show-dot="showAdminTicketsDot"
         ></menu-item>
         <menu-item
             v-if="$store.state.permissions && $store.state.permissions['App.Http.Controllers.Api.Dashboard.CannedReplyController']"
@@ -115,6 +116,13 @@ export default {
         mobile: {
             type: Boolean,
             required: false
+        }
+    },
+    computed: {
+        showAdminTicketsDot() {
+            return !!(this.$store.state.user
+                && Number(this.$store.state.user.role_id) === 1
+                && this.$store.state.dashboardNotificationCount > 0);
         }
     },
     mounted() {
