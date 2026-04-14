@@ -510,6 +510,10 @@
                                     class="flex items-center justify-between px-4 py-4 hover:bg-gray-100 sm:px-6"
                                 >
                                     <div class="flex items-center truncate space-x-3">
+                                        <span v-if="hasOverdueNotification(ticket)" class="relative mr-1 flex h-2.5 w-2.5 flex-shrink-0">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600"></span>
+                                        </span>
                                         <img
                                             :alt="$t('Avatar')"
                                             :src="ticket.user ? (ticket.user.avatar !== 'gravatar' ? ticket.user.avatar : ticket.user.gravatar) : ''"
@@ -525,7 +529,7 @@
                                                         {{ label.name }}
                                                     </div>
                                                 </template>
-                                                {{ ticket.subject }}
+                                                <span class="truncate">{{ ticket.subject }}</span>
                                             </div>
                                             <div class="text-sm leading-5 text-gray-500 w-full truncate">
                                                 {{ ticket.lastReply ? ticket.lastReply.body : null }}
@@ -553,6 +557,7 @@
                                         @change="selectAllTickets"
                                     >
                                 </th>
+                                <th class="px-2 py-2 text-center text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider w-8"></th>
                                 <th class="hidden lg:table-cell px-3 py-2 text-left text-xs leading-4 font-medium text-gray-600 uppercase tracking-wider">
                                     {{ $t('Customer') }}
                                 </th>
@@ -585,6 +590,12 @@
                                             @change="selectTicket"
                                             @click.stop
                                         >
+                                    </td>
+                                    <td class="px-2 py-4 whitespace-no-wrap text-center text-sm leading-5 font-medium">
+                                        <span v-if="hasOverdueNotification(ticket)" class="relative inline-flex h-2.5 w-2.5">
+                                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
+                                            <span class="relative inline-flex h-2.5 w-2.5 rounded-full bg-red-600"></span>
+                                        </span>
                                     </td>
                                     <td class="hidden lg:table-cell px-3 py-4 whitespace-no-wrap leading-5">
                                         <div class="flex items-center">
@@ -841,6 +852,9 @@ export default {
                 || this.filters.labels.length !== 0
                 || this.filters.statuses.length !== 0
                 || this.filters.priorities.length !== 0;
+        },
+        isAdmin() {
+            return !!(this.$store.state.user && Number(this.$store.state.user.role_id) === 1);
         }
     },
     filters: {
@@ -873,24 +887,56 @@ export default {
         },
 
 fetchNewTicketCount() {
+    if (this.isAdmin) {
+        axios.get('/api/dashboard/notifications/count')
+            .then((response) => {
+                this.newTicketCount = response.data.count || 0;
+                this.$store.commit('setDashboardNotificationCount', this.newTicketCount);
+                this.$store.commit('setUnreadTicketUuids', response.data.ticket_uuids || []);
+            })
+            .catch((error) => {
+                console.error('Failed to fetch ticket count', error);
+            });
+        return;
+    }
+
     axios.get('/api/dashboard/tickets-notif/new-count')
-        .then(response => {
+        .then((response) => {
             this.newTicketCount = response.data.count;
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Failed to fetch ticket count', error);
         });
 },
 
 markTicketsAsRead() {
+    if (this.isAdmin) {
+        axios.post('/api/dashboard/notifications/mark-read')
+            .then(() => {
+                this.fetchNewTicketCount();
+            })
+            .catch((error) => {
+                console.error('Failed to refresh admin ticket alerts', error);
+            });
+        return;
+    }
+
     axios.post('/api/dashboard/tickets-notif/mark-read')
         .then(() => {
             this.newTicketCount = 0;
         })
-        .catch(error => {
+        .catch((error) => {
             console.error('Failed to mark tickets as read', error);
         });
 },
+
+        hasOverdueNotification(ticket) {
+            if (!this.isAdmin || !ticket || !ticket.uuid) {
+                return false;
+            }
+
+            return this.$store.state.unreadTicketUuids.includes(ticket.uuid);
+        },
 
 
 
